@@ -14,7 +14,7 @@ app.use(express.json())
 
 const port = 5000;
 
-const url = "mongodb://localhost:27017/my_database";
+const url = process.env.MONGO_DB_URI || "mongodb://localhost:27017/my_database";
 mongoose.connect(url, {useNewUrlParser: true, useUnifiedTopology: true, useCreateIndex: true});
 
 const dbConnection = mongoose.connection;

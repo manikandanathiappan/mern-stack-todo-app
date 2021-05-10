@@ -4,7 +4,7 @@ const Schema = mongoose.Schema;
 const todoSchema = new Schema(
   {
     user_id: { type: String, required: true },
-    task: { type: String, required: true }
+    todos: { type: String, required: true }
   },
   { timestamps: true }
 );

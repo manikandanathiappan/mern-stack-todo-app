@@ -126,10 +126,10 @@ function Dashboard() {
                           <input name="checkbox" type="checkbox" onChange={() => setValue(checkBoxStatus + 1)} />&nbsp;
                           <span>{todo.todos}</span>
                           <span style={{position: "relative", right: "50px", float: "right"}} onClick={() => updateTask(todo._id)}>
-                            <FontawesomeIcon className="faicons" icon="edit"/>
+                            <FontAwesomeIcon className="faicons" icon="edit"/>
                           </span>
                           <span style={{float: "right"}} onClick={() => deleteTask(todo._id)}>
-                            <FontawesomeIcon className="faicons" icon="trash"/>
+                            <FontAwesomeIcon className="faicons" icon="trash"/>
                           </span>
                         </ListGroup.Item>
                       )

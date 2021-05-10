@@ -1,89 +1,149 @@
 import React, { useEffect, useState } from "react";
-import { Modal, Button, Card, CardGroup, ListGroup } from "react-bootstrap";
+import { Button, Card, CardGroup, ListGroup } from "react-bootstrap";
 import { BrowserRouter as Router, Switch, Route, Link } from "react-router-dom";
-import { PieChart, Pie } from 'recharts';
+import CustomModal, { UpdateCustomModal } from './Modal';
+import { PieChart } from 'react-minimal-pie-chart';
+import axios from 'axios';
+import { library } from '@fortawesome/fontawesome-svg-core';
+import { faTrash, faEdit } from '@fortawesome/free-solid-svg-icons';
+import { FontawesomeIcon } from '@fortawesome/react-fontawesome';
 
-function MyVerticallyCenteredModal(props) {
-  return (
-    <Modal {...props} aria-labelledby="contained-modal-title-vcenter" centered >
-      <Modal.Body>
-        <h4 style={{color: "#537178"}}>+ New Task</h4>
-        <br/>
-        <input type="text" className="form-control" placeholder="Task Name" />
-        <br/>
-        <div className="text-center"><Button onClick={props.onHide}>+ New Task</Button></div>
-      </Modal.Body>
-    </Modal>
-  );
-}
+library.add(faTrash, faEdit);
 
 function Dashboard() {
+  const loggedInUserDetails = props.location.state;
+  const [todos, setTodo] = useState([]);
   const [modalShow, setModalShow] = useState(false);
+  const [updateModalShow, setUpdateModalShow] = useState(false);
+  const [searchTerm, setSearchTerm] = useState('');
+  const [updatingId, setUpdatingId] = useState('');
+  const checkedBoxes = document.querySelectorAll('input[name=checkbox]:checked');
+  let [checkBoxStatus, setValue] = useState(0);
 
-  const data = [
-    { value: 15 }
-  ]
+  const sort_todos = [...todos];
+  sort_todos.sort((a ,b) => { return new Date(b.updatedAt).valueOf() - new Date(a.updatedAt).valueOf() });
+
+  useEffect(async () => {
+    if (loggedInUserDetails === undefined) {
+      <Redirect to='/sign-in'/>
+    } else {
+      const response = await axios.get(`http://localhost:500/todos?user_id=${loggedInUserDetails.user_id}`);
+      setTodo(response.data);
+    }
+  }, []);
+
+  function updateTask(id) {
+    setUpdateModalShow(true);
+    setUpdatingId(id);
+  }
+
+  function deleteTask(id) {
+    const confirmBeforeDel = window.confirm("Are you sure you want to delete?");
+    if(confirmBeforeDel == true) {
+      axios.delete(`http://localhost:5000/todos/${id}`)
+        .then(() => window.location.reload(false))
+        .catch(err => console.log(err))
+    } else {
+      console.log("Nothing happened!");
+    }
+  }
 
   return (
-    // <>
-    //   <nav className="navbar navbar-light bg-light fixed-top">
-    //     <Link className="nav-link" style={{textAlign: "center"}} to={"/sign-up"}>Sign Up</Link>
-    //     <Link className="nav-link" style={{textAlign: "center"}} to={"/log-out"}>Logout</Link>
-    //   </nav>
-    //   <h3 style={{color: "#537178", textAlign: "center"}}>You have no task</h3>
-    //   <br/>
-    //   <div className="text-center">
-    //     <Button variant="primary" onClick={() => setModalShow(true)}>
-    //       + New Task
-    //     </Button>
-    //   </div>
-
-    //   <MyVerticallyCenteredModal show={modalShow} onHide={() => setModalShow(false)} />
-    // </>
-    <div style={{marginLeft: "5%", marginRight: "5%"}}>
-      <CardGroup style={{marginTop: "100px"}}>
-        <Card style={{height: "250px", margin: "10px 10px"}}>
-          <Card.Body>
-            <Card.Title>Tasks Completed</Card.Title>
-            <Card.Text>
-              5/20
-            </Card.Text>
-          </Card.Body>
-        </Card>
-        <Card style={{height: "250px", margin: "10px 10px"}}>
-          <Card.Body>
-            <Card.Title>Latest Created Tasks</Card.Title>
-            <Card.Text>
-              <ul>
-                <li>Clean the room</li>
-                <li>Buy some vegetables, chicken & chips</li>
-                <li>Reinstall windows on PC</li>
-              </ul>
-            </Card.Text>
-          </Card.Body>
-        </Card>
-        <Card style={{height: "250px", margin: "10px 10px"}}>
-          <Card.Body style={{left: "20px"}}>
-            <PieChart width={250} height={250}>
-              <Pie dataKey="value" data={data} cx={175} cy={100} outerRadius={50} fill="#5285ec" />
-            </PieChart>
-          </Card.Body>
-        </Card>
-      </CardGroup>
-      <div style={{margin: "10px 10px"}} className="d-flex justify-content-between">
-        <h4>Tasks</h4>
-        <div className="form-group" style={{width: "200px", marginLeft: "800px", marginTop: "-15px"}}>
-          <input type="text" required className="form-control" placeholder="&#128269; Search by task name" />
-        </div>
-        <button className="btn btn-primary btn-block" style={{width: "200px", height: "38px"}}>+ New Task</button>
-      </div>
-      <ListGroup style={{margin: "10px 10px"}}>
-        <ListGroup.Item><input type="checkbox" />&nbsp;<span>Clean the room</span></ListGroup.Item>
-        <ListGroup.Item><input type="checkbox" />&nbsp;<span>Buy some vegetables, chicken & chips</span></ListGroup.Item>
-        <ListGroup.Item><input type="checkbox" />&nbsp;<span>Reinstall windows on PC</span></ListGroup.Item>
-        <ListGroup.Item><input type="checkbox" />&nbsp;<span>Start to work on new feature</span></ListGroup.Item>
-      </ListGroup>
-    </div>
+    <>
+      {
+        loggedInUserDetails === undefined ?
+        <Redirect to='/sign-in' /> :
+        <>
+          <nav className="navbar navbar-light bg-light fixed-top">
+            <h5 style={{position: "relative", top: "5px", marginLeft: "15px"}}>{loggedInUserDetails.user_name}</h5>
+            <Link className="nav-link" style={{textAlign: "center"}} to={"/log-out"}>Logout</Link>
+          </nav>
+          <>
+            {
+              todos.length === 0 ?
+              <div style={{position: "relative", top: "80px"}}>
+                <h3 style={{color: "#537178", textAlign: "center"}}>You have no task</h3>
+                <br/>
+                <div className="text-center">
+                  <Button style={{width: "200px"}} variant="primary" onClick={() => setModalShow(true)}>
+                    + New Task
+                  </Button>
+                </div>
+                <CustomModal userdetails={loggedInUserDetails} show={modalShow} onHide={() => setModalShow(false)} />
+              </div> :
+              <>
+                <div style={{marginLeft: "5%", marginRight: "5%"}}>
+                  <CardGroup style={{marginTop: "100px"}}>
+                    <Card style={{height: "250px", margin: "10px 10px"}}>
+                      <Card.Body>
+                        <Card.Title>Tasks Completed</Card.Title>
+                        <Card.Text style={{position: "relative", textAlign: "center", top: "35px"}}>
+                          <div><h1>{checkedBoxes.length}/{todos.length}</h1></div>
+                        </Card.Text>
+                      </Card.Body>
+                    </Card>
+                    <Card style={{height: "250px", margin: "10px 10px"}}>
+                      <Card.Body>
+                        <Card.Title style={{color: "#547279"}}>Latest Created Tasks</Card.Title>
+                        <br/>
+                        <Card.Text>
+                          <ul>
+                            {
+                              sort_todos.slice(0,3).map((todo) => <li key={todo._id}>{todo.todos}</li>)
+                            }
+                          </ul>
+                        </Card.Text>
+                      </Card.Body>
+                    </Card>
+                    <Card style={{height: "250px", margin: "10px 10px"}}>
+                      <Card.Body style={{left: "20px"}}>
+                        <PieChart radius={20} totalValue={todos.length} style={{position: "relative", bottom: "19%"}}
+                          data={[
+                            { value: todos.length - checkedBoxes.length, color: "#e8ecec" },
+                            { value: checkedBoxes.length, color: "#5285ec" }
+                          ]} 
+                        />
+                      </Card.Body>
+                    </Card>
+                  </CardGroup>
+                  <div style={{margin: "10px 10px"}}>
+                    <p style={{color: "#547279", fontWeight: "bold"}}>Tasks</p>
+                    <div className="form-group">
+                      <input type="text" required className="form-control" placeholder="&#128269; Search by task name" style={{width: "200px"}} onChange={(e) => setSearchTerm(e.target.value)} />
+                    </div>
+                    <button className="btn btn-primary btn-block" style={{width: "200px", height: "38px"}} onClick={() => setModalShow(true)}>+ New Task</button>
+                  </div>
+                  <ListGroup style={{margin: "10px 10px"}}>
+                    {
+                      todos.filter((todo) => {
+                        if(searchTerm === '') {
+                          return todo
+                        } else if(todo.todos.toLowerCase().includes(searchTerm.toLowerCase())) {
+                          return todo
+                        }
+                      }).map(todo =>
+                        <ListGroup.Item key={todo._id}>
+                          <input name="checkbox" type="checkbox" onChange={() => setValue(checkBoxStatus + 1)} />&nbsp;
+                          <span>{todo.todos}</span>
+                          <span style={{position: "relative", right: "50px", float: "right"}} onClick={() => updateTask(todo._id)}>
+                            <FontawesomeIcon className="faicons" icon="edit"/>
+                          </span>
+                          <span style={{float: "right"}} onClick={() => deleteTask(todo._id)}>
+                            <FontawesomeIcon className="faicons" icon="trash"/>
+                          </span>
+                        </ListGroup.Item>
+                      )
+                    }
+                  </ListGroup>
+                </div>
+                <CustomModal userdetails={loggedInUserDetails} show={modalShow} onHide={() => setModalShow(false)} />
+                <UpdateCustomModal userdetails={loggedInUserDetails} id={updatingId} show={updateModalShow} onHide={() => setUpdateModalShow(false)} />
+              </>
+            }
+          </>
+        </>
+      }
+    </>
   );
 }
 

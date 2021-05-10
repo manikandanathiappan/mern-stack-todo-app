@@ -1,11 +1,27 @@
-import { BrowserRouter as Route, Link } from "react-router-dom";
+import { useState, useEffect } from "react";
+import { BrowserRouter as Route, Redirect } from "react-router-dom";
+import axios from 'axios';
 
 function SignOut() {
+  const [logOutResponse, setLogOutResponse] = useState('');
+
+  useEffect(async () => {
+    const response = await axios.post('http://localhost:5000/logout');
+    setLogOutResponse(response.data);
+  })
+
   return (
-    <div>
-      <h3 style={{textAlign: "center"}}>You have been successfully logged out</h3>
-      <br/>
-      <h6 style={{textAlign: "center"}}>Redirecting you to Login Page...</h6>
+    <div className="App">
+      <div className="auth-wrapper">
+        <div className="auth-inner">
+          <h3 style={{textAlign: "center"}}>You have been successfully logged out</h3>
+          <br/>
+          <h6 style={{textAlign: "center"}}>Redirecting you to Login Page...</h6>
+          {
+            logOutResponse !== '' ? <Redirect to='/sign-in' /> : ''
+          }
+        </div>
+      </div>
     </div>
   );
 }

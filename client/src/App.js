@@ -11,29 +11,17 @@ import Dashboard from "./components/Dashboard";
 import SignOut from "./components/SignOut";
 
 function App() {
-  // let [isAuthenticated, setAuthenticated] = useState(false);
-
-  // useEffect(() => {
-  //   setAuthenticated(isAuthenticated = true)
-  // });
 
   return (
-    <Dashboard />
-    // <Router>
-    //   <div className="App">
-    //     <div className="auth-wrapper">
-    //       <div className="auth-inner">
-    //         <Switch>
-    //           <Route exact path='/' component={Login} />
-    //           <Route exact path="/sign-in" component={Login} />
-    //           <Route exact path="/sign-up" component={SignUp} />
-    //           <Route exact path="/dashboard" component={Dashboard} />
-    //           <Route exact path="/log-out" component={SignOut} />
-    //         </Switch>
-    //       </div>
-    //     </div>
-    //   </div>
-    // </Router>
+    <Router>
+      <Switch>
+        <Route exact path='/' component={Login} />
+        <Route exact path="/sign-in" component={Login} />
+        <Route exact path="/sign-up" component={SignUp} />
+        <Route exact path="/dashboard" component={Dashboard} />
+        <Route exact path="/log-out" component={SignOut} />
+      </Switch>
+    </Router>
   );
 }
 

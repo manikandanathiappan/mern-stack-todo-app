@@ -11,6 +11,13 @@ TODO application is a used for adding our day to day activities and delete them 
 npm install
 ```
 
+## Setup
+
+After installing node_modules for both client and server, if we need to run the application locally, please follow below steps.
+
+* Open a terminal and run ```npm start``` to start the React application
+* Open another terminal and run ```npm run dev``` to start Node.js server (Nodemon to load changes automatically).
+
 ## Usage
 
 * This is a simple Todo application build in ReactJS and Node.js with MongoDB as database.

@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { Button, Card, CardGroup, ListGroup } from "react-bootstrap";
-import { BrowserRouter as Router, Switch, Route, Link } from "react-router-dom";
+import { BrowserRouter as Router, Switch, Route, Link, Redirect } from "react-router-dom";
 import CustomModal, { UpdateCustomModal } from './Modal';
 import { PieChart } from 'react-minimal-pie-chart';
 import axios from 'axios';
@@ -10,7 +10,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 
 library.add(faTrash, faEdit);
 
-function Dashboard() {
+function Dashboard(props) {
   const loggedInUserDetails = props.location.state;
   const [todos, setTodo] = useState([]);
   const [modalShow, setModalShow] = useState(false);

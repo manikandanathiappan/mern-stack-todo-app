@@ -6,7 +6,7 @@ import { PieChart } from 'react-minimal-pie-chart';
 import axios from 'axios';
 import { library } from '@fortawesome/fontawesome-svg-core';
 import { faTrash, faEdit } from '@fortawesome/free-solid-svg-icons';
-import { FontawesomeIcon } from '@fortawesome/react-fontawesome';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 
 library.add(faTrash, faEdit);
 

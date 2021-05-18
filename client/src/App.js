@@ -1,9 +1,7 @@
-import React, { useState, useEffect } from 'react'
+import React from 'react'
 import 'bootstrap/dist/css/bootstrap.min.css';
 import './App.css';
-import { Modal, Button, Card } from "react-bootstrap";
-import { BrowserRouter as Router, Switch, Route, Redirect } from "react-router-dom";
-import axios from 'axios';
+import { BrowserRouter as Router, Switch, Route } from "react-router-dom";
 
 import Login from "./components/Login";
 import SignUp from "./components/SignUp";

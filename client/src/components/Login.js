@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react'
+import React, { useState } from 'react'
 import { BrowserRouter as Route, Link, Redirect } from "react-router-dom";
 import axios from 'axios';
 
@@ -8,13 +8,12 @@ function Login() {
     password : ''
   });
   const [userResponse, setResponse] = useState('');
-  const [userData, setUserData] = useState({ id: '', user_name: '', user_id: '', created_at: '', updated_at: '' })
 
   const submitForm = e => {
     e.preventDefault();
     axios.post('http://localhost:5000/login', userDetails)
       .then(res => {
-        setUserData(res.data);
+        localStorage.setItem("token", res.data.token);
         setResponse(res.data.message);
       })
       .catch(err => setResponse(err.response.data.message));
@@ -25,18 +24,21 @@ function Login() {
       <div className="auth-wrapper">
         <div className="auth-inner">
           <form onSubmit={submitForm}>
-            <h5>Login</h5>
             {
-              userResponse == '' ? '' :
+              localStorage.getItem("token") === null ? '' : <Redirect to='/dashboard' /> 
+            }
+            {
+              userResponse === '' ? '' :
               <div>
                 {
-                  userResponse == "Login successful" ? <Redirect to={{ pathname: '/dashboard', state: userData }} /> :
+                  userResponse === "Login successful" ? <Redirect to={{ pathname: '/dashboard' }} /> :
                   <h6 style={{position: "relative", textAlign: "center", color: "red", fontWeight: "bold", bottom: "15px"}}>{userResponse}</h6>
                 }
               </div>
             }
+            <h5>Login</h5>
             <div className="form-group">
-              <input type="text" required className="form-control" placeholder="ID" onChange={e =>  setDetails({...userDetails, id: e.target.value})} value={userDetails.id} />
+              <input type="text" required className="form-control" placeholder="ID" onChange={e =>  setDetails({...userDetails, user_id: e.target.value})} value={userDetails.user_id} />
             </div>
 
             <div className="form-group">

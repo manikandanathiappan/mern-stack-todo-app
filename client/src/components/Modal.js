@@ -12,7 +12,7 @@ export function UpdateCustomModal(props) {
 
   const updateTodo = e => {
     e.preventDefault();
-    axios.post(`http://localhost:5000/todos/update/${_id}`, todo)
+    axios.put(`http://localhost:5000/todos/update/${_id}`, todo)
       .then(() => window.location.reload(false));
   }
 
@@ -38,7 +38,7 @@ export default function CustomModal(props) {
 
   const createNewTodo = e => {
     e.preventDefault();
-    axios.post(`http://localhost:5000/todos/add`, todo)
+    axios.post(`http://localhost:5000/todo/add`, todo)
       .then(() => window.location.reload(false));
   }
 
@@ -49,7 +49,7 @@ export default function CustomModal(props) {
         <br/>
         <input type="text" className="form-control" placeholder="Task Name" onChange={e => setTodo({...todo, todos: e.target.value})} value={todo.todos} />
         <br/>
-        <button type="submit" onClick={createNewTodo} className="btn btn-primary btn-block">Update Task</button>
+        <button type="submit" onClick={createNewTodo} className="btn btn-primary btn-block">Create Task</button>
       </Modal.Body>
     </Modal>
   );

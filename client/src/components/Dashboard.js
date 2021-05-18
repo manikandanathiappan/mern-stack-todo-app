@@ -7,29 +7,37 @@ import axios from 'axios';
 import { library } from '@fortawesome/fontawesome-svg-core';
 import { faTrash, faEdit } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import jwt_token from 'jwt-decode';
 
 library.add(faTrash, faEdit);
 
-function Dashboard(props) {
-  const loggedInUserDetails = props.location.state;
+function Dashboard() {
+  const token = localStorage.getItem('token');
+  let loggedInUserDetails;
+  if (token === null) {
+    <Redirect to='/sign-in' />
+  } else {
+    loggedInUserDetails = jwt_token(token);
+  }
   const [todos, setTodo] = useState([]);
+  const [doneTodos, setDoneTodos] = useState([]);
   const [modalShow, setModalShow] = useState(false);
   const [updateModalShow, setUpdateModalShow] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
   const [updatingId, setUpdatingId] = useState('');
-  const checkedBoxes = document.querySelectorAll('input[name=checkbox]:checked');
-  let [checkBoxStatus, setValue] = useState(0);
 
   const sort_todos = [...todos];
   sort_todos.sort((a ,b) => { return new Date(b.updatedAt).valueOf() - new Date(a.updatedAt).valueOf() });
 
-  useEffect(async () => {
-    if (loggedInUserDetails === undefined) {
-      <Redirect to='/sign-in'/>
-    } else {
-      const response = await axios.get(`http://localhost:500/todos?user_id=${loggedInUserDetails.user_id}`);
-      setTodo(response.data);
-    }
+  useEffect(() => {
+    (async function() {
+      if (token !== null) {
+        const response = await axios.get(`http://localhost:5000/todos?user_id=${loggedInUserDetails.user_id}`);
+        setTodo(response.data);
+        const doneResponse = await axios.get(`http://localhost:5000/todos/done?user_id=${loggedInUserDetails.user_id}`);
+        setDoneTodos(doneResponse.data);
+      }
+    })();
   }, []);
 
   function updateTask(id) {
@@ -39,13 +47,20 @@ function Dashboard(props) {
 
   function deleteTask(id) {
     const confirmBeforeDel = window.confirm("Are you sure you want to delete?");
-    if(confirmBeforeDel == true) {
+    if(confirmBeforeDel === true) {
       axios.delete(`http://localhost:5000/todos/${id}`)
         .then(() => window.location.reload(false))
         .catch(err => console.log(err))
     } else {
       console.log("Nothing happened!");
     }
+  }
+
+  async function changeStatus(id) {
+    const response = await axios.get(`http://localhost:5000/todos/get/${id}`)
+    const todoData = response.data;
+    axios.put(`http://localhost:5000/todos/update/${id}`, { user_id: todoData.user_id, todos: todoData.todos, is_active : !todoData.is_active })
+      .then(res => window.location.reload(false));
   }
 
   return (
@@ -69,27 +84,27 @@ function Dashboard(props) {
                     + New Task
                   </Button>
                 </div>
-                <CustomModal userdetails={loggedInUserDetails} show={modalShow} onHide={() => setModalShow(false)} />
+                <CustomModal userDetails={loggedInUserDetails} show={modalShow} onHide={() => setModalShow(false)} />
               </div> :
               <>
                 <div style={{marginLeft: "5%", marginRight: "5%"}}>
                   <CardGroup style={{marginTop: "100px"}}>
                     <Card style={{height: "250px", margin: "10px 10px"}}>
                       <Card.Body>
-                        <Card.Title>Tasks Completed</Card.Title>
+                        <Card.Title style={{color: "#547279"}}>Tasks Completed</Card.Title>
                         <Card.Text style={{position: "relative", textAlign: "center", top: "35px"}}>
-                          <div><h1>{checkedBoxes.length}/{todos.length}</h1></div>
+                          <div><h1>{doneTodos.length}/{todos.length}</h1></div>
                         </Card.Text>
                       </Card.Body>
                     </Card>
                     <Card style={{height: "250px", margin: "10px 10px"}}>
                       <Card.Body>
-                        <Card.Title style={{color: "#547279"}}>Latest Created Tasks</Card.Title>
+                        <Card.Title style={{color: "#547279"}}>Latest Updated Tasks</Card.Title>
                         <br/>
                         <Card.Text>
                           <ul>
                             {
-                              sort_todos.slice(0,3).map((todo) => <li key={todo._id}>{todo.todos}</li>)
+                              sort_todos.slice(0,3).map((todo) => <li style={!todo.is_active ? {textDecoration: "line-through"} : {textDecoration: "none"}} key={todo._id}>{todo.todos}</li>)
                             }
                           </ul>
                         </Card.Text>
@@ -99,8 +114,8 @@ function Dashboard(props) {
                       <Card.Body style={{left: "20px"}}>
                         <PieChart radius={20} totalValue={todos.length} style={{position: "relative", bottom: "19%"}}
                           data={[
-                            { value: todos.length - checkedBoxes.length, color: "#e8ecec" },
-                            { value: checkedBoxes.length, color: "#5285ec" }
+                            { value: todos.length - doneTodos.length, color: "#e8ecec" },
+                            { value: doneTodos.length, color: "#5285ec" }
                           ]} 
                         />
                       </Card.Body>
@@ -123,12 +138,12 @@ function Dashboard(props) {
                         }
                       }).map(todo =>
                         <ListGroup.Item key={todo._id}>
-                          <input name="checkbox" type="checkbox" onChange={() => setValue(checkBoxStatus + 1)} />&nbsp;
+                          <input name="checkbox" type="checkbox" checked={!todo.is_active} onChange={() => changeStatus(todo._id)} />&nbsp;
                           <span>{todo.todos}</span>
-                          <span style={{position: "relative", right: "50px", float: "right"}} onClick={() => updateTask(todo._id)}>
+                          <span style={{position: "relative", right: "50px", float: "right", cursor: "pointer"}} onClick={() => updateTask(todo._id)}>
                             <FontAwesomeIcon className="faicons" icon="edit"/>
                           </span>
-                          <span style={{float: "right"}} onClick={() => deleteTask(todo._id)}>
+                          <span style={{float: "right", cursor: "pointer"}} onClick={() => deleteTask(todo._id)}>
                             <FontAwesomeIcon className="faicons" icon="trash"/>
                           </span>
                         </ListGroup.Item>
@@ -136,8 +151,8 @@ function Dashboard(props) {
                     }
                   </ListGroup>
                 </div>
-                <CustomModal userdetails={loggedInUserDetails} show={modalShow} onHide={() => setModalShow(false)} />
-                <UpdateCustomModal userdetails={loggedInUserDetails} id={updatingId} show={updateModalShow} onHide={() => setUpdateModalShow(false)} />
+                <CustomModal userDetails={loggedInUserDetails} show={modalShow} onHide={() => setModalShow(false)} />
+                <UpdateCustomModal userDetails={loggedInUserDetails} id={updatingId} show={updateModalShow} onHide={() => setUpdateModalShow(false)} />
               </>
             }
           </>

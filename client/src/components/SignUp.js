@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react'
+import React, { useState } from 'react'
 import { BrowserRouter as Route, Link, Redirect } from "react-router-dom";
 import axios from 'axios';
 
@@ -23,10 +23,10 @@ export default function SignUp() {
         <div className="auth-inner">
           <form onSubmit={submitForm}>
             {
-              resStatus == '' ? '' :
+              resStatus === '' ? '' :
               <div>
-                {resStatus == "Already exists"} ? <h6 style={{position: "relative", textAlign: "center", color: "red", bottom: "15px"}}>User ID already exists</h6>
-                <Redirect to='/sign-in' />
+                {resStatus === "Already exists" ? <h6 style={{position: "relative", textAlign: "center", color: "red", bottom: "15px"}}>User ID already exists</h6> :
+                <Redirect to='/sign-in' /> }
               </div>
             }
             <h5>Sign Up</h5>

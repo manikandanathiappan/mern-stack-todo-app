@@ -5,10 +5,13 @@ import axios from 'axios';
 function SignOut() {
   const [logOutResponse, setLogOutResponse] = useState('');
 
-  useEffect(async () => {
-    const response = await axios.post('http://localhost:5000/logout');
-    setLogOutResponse(response.data);
-  })
+  useEffect(() => {
+    (async function() {
+      const response = await axios.post('http://localhost:5000/logout');
+      localStorage.removeItem('token');
+      setLogOutResponse(response.data);
+    })();
+  }, [])
 
   return (
     <div className="App">

@@ -1,9 +1,8 @@
 const express = require('express');
-const session = require('express-session');
 const cors = require('cors');
 const bcrypt = require('bcryptjs');
+const jwt = require('jsonwebtoken');
 const mongoose = require('mongoose');
-const dbSession = require('connect-mongodb-session')(session);
 const User = require('./models/user.model');
 const Todo = require('./models/todo.model');
 
@@ -22,23 +21,6 @@ dbConnection.once('open', () => {
   console.log('Database connected');
 });
 
-const store = new dbSession({ uri: url, collection: "sessions" });
-
-app.use(session({
-  secret: 'secret_key',
-  resave: false,
-  saveUninitialized: true,
-  store: store
-}));
-
-const isAuth = (req, res, next) => {
-  if(req.session.isAuth) {
-    next();
-  } else {
-    res.json("Redirect user to login page");
-  }
-}
-
 app.post('/login', async (req, res) => {
   const { user_id, password } = req.body;
   const user = await User.findOne({ user_id });
@@ -51,15 +33,17 @@ app.post('/login', async (req, res) => {
     return res.status(401).json({ message: "Invalid Username or Password" })
   }
 
-  req.session.isAuth = true;
-
-  res.status(200).json({
+  const token = jwt.sign({
     _id: user._id,
     user_name: user.user_name,
     user_id: user.user_id,
     updated_at: user.updated_at,
-    created_at: user.created_at,
-    message: "Login successful"
+    created_at: user.created_at
+  }, 'qwertyuiop!@#$%asdfghjkl^&*()zxcvbnm')
+
+  res.status(200).json({
+    message: "Login successful",
+    token: token
   })
 })
 
@@ -72,15 +56,9 @@ app.post('/todo/add', async (req, res) => {
 })
 
 app.post('/logout', (req, res) => {
-  req.session.destroy((error) => {
-    if (error) {
-      throw error;
-    } else {
-      setTimeout(() => {
-        res.status(200).json("Logged out successfully");
-      }, 3000);
-    }
-  });
+  setTimeout(() => {
+    res.status(200).json("Logged out successfully");
+  }, 3000);
 });
 
 const usersRouter = require('./routes/users');

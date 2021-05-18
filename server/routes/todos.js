@@ -7,6 +7,18 @@ router.get('/', (req, res) => {
     .catch(err => res.status(400).json(`Error: ${err}`))
 })
 
+router.get('/get/:id', (req, res) => {
+  Todo.findById(req.params.id)
+    .then(todo => res.json(todo))
+    .catch(err => res.status(400).json(`Error: ${err}`))
+})
+
+router.get('/done', (req, res) => {
+  Todo.find({ user_id: req.query.user_id, is_active: false })
+    .then(todos => res.json(todos))
+    .catch(err => res.status(400).json(`Error: ${err}`))
+})
+
 router.post('/add', (req, res) => {
   const { username, task } = req.body;
 
@@ -16,10 +28,11 @@ router.post('/add', (req, res) => {
     .catch(err => res.status(400).json(`Error: ${err}`))
 })
 
-router.post('/update/:id', (req, res) => {
-  Todo.findById(req.query.id)
+router.put('/update/:id', (req, res) => {
+  Todo.findById(req.params.id)
     .then(task => {
       task.todos = req.body.todos;
+      task.is_active = req.body.is_active;
       task.save()
         .then(() => res.json("Task updated succesfully!"))
         .catch(err => res.status(400).json(`Error: ${err}`))

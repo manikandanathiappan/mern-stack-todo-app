@@ -7,7 +7,7 @@ router.post('/add', async (req, res) => {
   let user = await User.findOne({ user_id });
 
   if(user) {
-    return res.json({ status: 400, error: "Already exists"})
+    return res.status(400).json({ message: "Already exists"})
   }
 
   password = await bcrypt.hash(password, 10);

@@ -32,11 +32,11 @@ export default function SignUp() {
             <h5>Sign Up</h5>
 
             <div className="form-group">
-              <input type="text" required className="form-control" placeholder="Name" onChange={e =>  setDetails({...userDetails, user_name: e.target.value})} value={userDetails.user_name} />
+              <input type="text" required minLength={6} className="form-control" placeholder="Name" onChange={e =>  setDetails({...userDetails, user_name: e.target.value})} value={userDetails.user_name} />
             </div>
 
             <div className="form-group">
-              <input type="text" required className="form-control" placeholder="ID" onChange={e =>  setDetails({...userDetails, user_id: e.target.value})} value={userDetails.user_id} />
+              <input type="text" required minLength={3} className="form-control" placeholder="ID" onChange={e =>  setDetails({...userDetails, user_id: e.target.value})} value={userDetails.user_id} />
             </div>
 
             <div className="form-group">

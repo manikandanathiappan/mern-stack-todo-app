@@ -44,7 +44,7 @@ export default function SignUp() {
             </div>
 
             <button type="submit" className="btn btn-primary btn-block">Sign Up</button>
-            <p><Link className="nav-link" style={{textAlign: "center"}} to={"/sign-in"}>Click here to Login</Link></p>
+            <h6><Link className="nav-link" style={{textAlign: "center"}} to={"/sign-in"}>Click here to Login</Link></h6>
           </form>
         </div>
       </div>

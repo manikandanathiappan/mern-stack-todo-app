@@ -5,9 +5,10 @@ import axios from 'axios';
 export function UpdateCustomModal(props) {
   const userId = props.userDetails.user_id;
   const _id = props.id;
+  const receivedTodos = props.todo;
   const [todo, setTodo] = useState({
     user_id: userId,
-    todos: ''
+    todos: receivedTodos
   })
 
   const updateTodo = e => {

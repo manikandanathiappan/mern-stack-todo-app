@@ -46,7 +46,7 @@ function Login() {
             </div>
 
             <button type="submit" className="btn btn-primary btn-block">Login</button>
-            <p><Link className="nav-link" style={{textAlign: "center"}} to={"/sign-up"}>Click here to Register</Link></p>
+            <h6><Link className="nav-link" style={{textAlign: "center"}} to={"/sign-up"}>Click here to Register</Link></h6>
           </form>
         </div>
       </div>

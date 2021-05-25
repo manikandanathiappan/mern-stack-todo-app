@@ -25,9 +25,10 @@ function Dashboard() {
   const [updateModalShow, setUpdateModalShow] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
   const [updatingId, setUpdatingId] = useState('');
+  const [updatingTodo, setUpdatingTodo] = useState('');
 
   const sort_todos = [...todos];
-  sort_todos.sort((a ,b) => { return new Date(b.updatedAt).valueOf() - new Date(a.updatedAt).valueOf() });
+  sort_todos.sort((a ,b) => { return new Date(b.createdAt).valueOf() - new Date(a.createdAt).valueOf() });
 
   useEffect(() => {
     (async function() {
@@ -40,27 +41,36 @@ function Dashboard() {
     })();
   }, []);
 
-  function updateTask(id) {
+  function updateTask(id, todo) {
     setUpdateModalShow(true);
     setUpdatingId(id);
+    setUpdatingTodo(todo);
   }
 
-  function deleteTask(id) {
+  const deleteTask = (id) => {
     const confirmBeforeDel = window.confirm("Are you sure you want to delete?");
     if(confirmBeforeDel === true) {
       axios.delete(`http://localhost:5000/todos/${id}`)
-        .then(() => window.location.reload(false))
+        .then(() => {
+          axios.get(`http://localhost:5000/todos?user_id=${loggedInUserDetails.user_id}`)
+            .then(response => setTodo(response.data))
+        })
         .catch(err => console.log(err))
     } else {
       console.log("Nothing happened!");
     }
   }
 
-  async function changeStatus(id) {
+  const changeStatus = async (id) => {
     const response = await axios.get(`http://localhost:5000/todos/get/${id}`)
     const todoData = response.data;
     axios.put(`http://localhost:5000/todos/update/${id}`, { user_id: todoData.user_id, todos: todoData.todos, is_active : !todoData.is_active })
-      .then(res => window.location.reload(false));
+      .then(() => {
+        axios.get(`http://localhost:5000/todos?user_id=${loggedInUserDetails.user_id}`)
+          .then(response => setTodo(response.data))
+        axios.get(`http://localhost:5000/todos/done?user_id=${loggedInUserDetails.user_id}`)
+          .then(response => setDoneTodos(response.data))
+      });
   }
 
   return (
@@ -99,7 +109,7 @@ function Dashboard() {
                     </Card>
                     <Card style={{height: "250px", margin: "10px 10px"}}>
                       <Card.Body>
-                        <Card.Title style={{color: "#547279"}}>Latest Updated Tasks</Card.Title>
+                        <Card.Title style={{color: "#547279"}}>Latest Created Tasks</Card.Title>
                         <br/>
                         <Card.Text>
                           <ul>
@@ -140,7 +150,7 @@ function Dashboard() {
                         <ListGroup.Item key={todo._id}>
                           <input name="checkbox" type="checkbox" checked={!todo.is_active} onChange={() => changeStatus(todo._id)} />&nbsp;
                           <span>{todo.todos}</span>
-                          <span style={{position: "relative", right: "50px", float: "right", cursor: "pointer"}} onClick={() => updateTask(todo._id)}>
+                          <span style={{position: "relative", right: "50px", float: "right", cursor: "pointer"}} onClick={() => updateTask(todo._id, todo.todos)}>
                             <FontAwesomeIcon className="faicons" icon="edit"/>
                           </span>
                           <span style={{float: "right", cursor: "pointer"}} onClick={() => deleteTask(todo._id)}>
@@ -152,7 +162,7 @@ function Dashboard() {
                   </ListGroup>
                 </div>
                 <CustomModal userDetails={loggedInUserDetails} show={modalShow} onHide={() => setModalShow(false)} />
-                <UpdateCustomModal userDetails={loggedInUserDetails} id={updatingId} show={updateModalShow} onHide={() => setUpdateModalShow(false)} />
+                <UpdateCustomModal userDetails={loggedInUserDetails} id={updatingId} todo={updatingTodo} show={updateModalShow} onHide={() => setUpdateModalShow(false)} />
               </>
             }
           </>
